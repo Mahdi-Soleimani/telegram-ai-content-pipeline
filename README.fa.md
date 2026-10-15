@@ -7,6 +7,7 @@
   **سامانه سازمانی مانیتورینگ، پردازش و بازنویسی چندمدلی با هوش مصنوعی و انتشار خودکار در کانال‌های تلگرام**
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+  [![CI Pipeline](https://img.shields.io/github/actions/workflow/status/Mahdi-Soleimani/telegram-ai-content-pipeline/ci.yml?branch=main&label=CI&style=flat-square&logo=githubactions&logoColor=white)](https://github.com/Mahdi-Soleimani/telegram-ai-content-pipeline/actions/workflows/ci.yml)
   [![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
   [![Telethon](https://img.shields.io/badge/Telegram-Telethon%20v1.44-2CA5E0.svg?style=flat-square&logo=telegram&logoColor=white)](https://github.com/LonamiWebs/Telethon)
   [![n8n](https://img.shields.io/badge/Orchestration-n8n%20Workflows-EA4B71.svg?style=flat-square&logo=n8n&logoColor=white)](https://n8n.io/)
