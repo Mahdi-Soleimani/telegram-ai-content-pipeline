@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تولید کد اتصال ربات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="brand">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L4 6V11C4 15.4 7.2 19.5 12 21C16.8 19.5 20 15.4 20 11V6L12 2Z" stroke="url(#g)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M9.5 12L11.2 13.7L14.5 10.2" stroke="url(#g)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="g" x1="4" y1="2" x2="20" y2="21">
+              <stop stop-color="#5b8cff"/>
+              <stop offset="1" stop-color="#8a5bff"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1>تولید کد اتصال ربات</h1>
+      <p>سه مرحله‌ی ساده، بدون نیاز به دانش فنی</p>
+    </div>
+
+    <div class="card">
+      <div class="steps">
+        <div class="seg"><i id="seg1"></i></div>
+        <div class="seg"><i id="seg2"></i></div>
+        <div class="seg"><i id="seg3"></i></div>
+      </div>
+
+      <div class="error" id="errorBox"></div>
+
+      <!-- STEP 1: phone -->
+      <div class="step active" id="step1">
+        <div class="eyebrow">مرحله ۱ از ۳</div>
+        <h2>شماره تلفن حساب تلگرام</h2>
+        <p class="hint">شماره‌ای که ربات باید با آن به تلگرام وصل شود، همراه با کد کشور وارد کنید.</p>
+        <div class="field">
+          <label for="phone">شماره تلفن</label>
+          <input type="tel" id="phone" placeholder="مثلاً 989121234567+" autocomplete="off">
+        </div>
+        <button class="primary" id="btnSendCode" onclick="sendCode()">
+          <span class="spinner"></span>
+          <span class="btn-label">دریافت کد ورود</span>
+        </button>
+      </div>
+
+      <!-- STEP 2: code -->
+      <div class="step" id="step2">
+        <div class="eyebrow">مرحله ۲ از ۳</div>
+        <h2>کد تایید</h2>
+        <p class="hint">کدی که تلگرام برای این حساب فرستاد را همین‌جا وارد کنید.</p>
+        <div class="field">
+          <label for="code">کد تایید</label>
+          <input type="text" id="code" placeholder="مثلاً 12345" autocomplete="off" inputmode="numeric">
+        </div>
+        <button class="primary" id="btnVerify" onclick="verifyCode()">
+          <span class="spinner"></span>
+          <span class="btn-label">تایید و ادامه</span>
+        </button>
+        <button class="link-btn" onclick="goStep(1)">شماره اشتباه بود؟ برگرد</button>
+      </div>
+
+      <!-- STEP 2b: 2fa password (shown conditionally) -->
+      <div class="step" id="step2b">
+        <div class="eyebrow">مرحله ۲ از ۳ &middot; تایید دومرحله‌ای</div>
+        <h2>رمز عبور تلگرام</h2>
+        <p class="hint">این حساب رمز عبور دومرحله‌ای فعال دارد. همان رمز را وارد کنید.</p>
+        <div class="field">
+          <label for="password">رمز عبور</label>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="off">
+        </div>
+        <button class="primary" id="btnPassword" onclick="verifyPassword()">
+          <span class="spinner"></span>
+          <span class="btn-label">تایید نهایی</span>
+        </button>
+      </div>
+
+      <!-- STEP 3: result -->
+      <div class="step result" id="step3">
+        <div class="eyebrow">مرحله ۳ از ۳</div>
+        <h2>اتصال با موفقیت انجام شد</h2>
+        <div class="ok-badge">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          کد اتصال آماده است
+        </div>
+        <div class="output-box">
+          <div class="scanline"></div>
+          <textarea id="sessionOutput" readonly></textarea>
+        </div>
+        <button class="copy-btn" id="copyBtn" onclick="copyOutput()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span id="copyLabel">کپی کردن کد</span>
+        </button>
+        <div class="warn">این کد معادل رمز ورود به حساب تلگرام است. فقط آن را در جای امنی (تنظیمات محیطی سرور، تحت متغیر SESSION_STRING) قرار دهید و برای هیچ‌کس دیگری ارسال نکنید.</div>
+      </div>
+
+    </div>
+    <div class="foot">این صفحه فقط برای تولید یک‌بارهٔ کد اتصال است</div>
+  </div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

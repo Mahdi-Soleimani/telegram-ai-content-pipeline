@@ -1,0 +1,116 @@
+# ==============================================================================
+# Git Ignore Configuration - Telegram AI Content Pipeline
+# ==============================================================================
+
+# --- Environment & Sensitive Credentials ---
+.env
+.env.*
+.env.local
+.env.development
+.env.production
+!.env.example
+!*/.env.example
+
+# --- Telegram Sessions & SQLite Databases ---
+*.session
+*.session-journal
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+data/
+
+# --- Original Local Workflows & Private Media (Preserved Locally) ---
+n8n-bot/n8n.json
+n8n-bot/Error Handling.json
+n8n-bot/*.mp4
+*.mp4
+
+# --- Python Artifacts & Caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environments ---
+venv/
+ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# --- Logs & Runtime Output ---
+*.log
+logs/
+userbot.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Operating System Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# --- IDEs & Editors ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# --- Node / Front-end (if applicable) ---
+node_modules/
+.npm/
+
+# --- Backups & Scratch ---
+*backup*
+*.bak
+scratch/
+tmp/
+temp/
+
+# --- Internal Documentation & Agent Configuration ---
+docs/internal/
+docs/PROJECT_ANALYSIS.md
+.agent/
+.agents/
+.antigravity/
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+.cursor/
+.cursorrules
+.windsurf/
+.claude/
+.gemini/
+.github/copilot-instructions.md
+.aider*
+.continue/
+.clinerules

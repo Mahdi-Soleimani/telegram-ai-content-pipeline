@@ -1,0 +1,13 @@
+.env
+.env*
+!.env.example
+*.session
+*.session-journal
+*.db
+*.db-wal
+*.db-shm
+*.log
+__pycache__/
+*.pyc
+.git/
+.gitignore

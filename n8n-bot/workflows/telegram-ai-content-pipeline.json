@@ -1,0 +1,2358 @@
+{
+  "name": "Telegram AI Content Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -3360,
+        576
+      ],
+      "id": "3be1aa8e-824e-4d8e-bb17-6786d91907ce",
+      "name": "Telegram Trigger",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Configure your telegramApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\nfor (let i = 0; i < items.length; i++) {\n  let msg = items[i].json.message || items[i].json.channel_post || items[i].json;\n\n  let fileId = null;\n  let mediaType = 'text';\n\n  if (msg.photo && msg.photo.length > 0) {\n    fileId = msg.photo[msg.photo.length - 1].file_id;\n    mediaType = 'photo';\n  } else if (msg.video) { fileId = msg.video.file_id; mediaType = 'video';\n  } else if (msg.audio) { fileId = msg.audio.file_id; mediaType = 'audio';\n  } else if (msg.voice) { fileId = msg.voice.file_id; mediaType = 'voice';\n  } else if (msg.document) { fileId = msg.document.file_id; mediaType = 'document';\n  } else if (msg.animation) { fileId = msg.animation.file_id; mediaType = 'animation'; }\n\n  let textContent = msg.caption || msg.text || \"\";\n\n  let shouldBlock = false;\n  if (msg.media_group_id && !textContent) {\n    shouldBlock = true;\n  }\n\n  items[i].json.my_data = {\n    has_media: fileId !== null,\n    media_type: mediaType,\n    file_id: fileId,\n    media_group_id: msg.media_group_id || null,\n    message_id: msg.message_id,\n    chat_id: msg.chat?.id || null,\n    text_content: textContent,\n    is_album_part_without_text: shouldBlock\n  };\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3120,
+        576
+      ],
+      "id": "2f3c838f-ab03-4687-b803-b41691ee4dfc",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $if($('Code in JavaScript').isExecuted, $('Code in JavaScript').first().json.my_data?.text_content, '') || $if($('Code in JavaScript6').isExecuted, $('Code in JavaScript6').first().json.original_text, '') || 'کپشنی نداریم پس کپشنی تولید نکن' }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "بخش اول | نقش، مأموریت و فرآیند تحلیل\n\nTelegram Onchain Editorial AI (TOE-AI) v1.0\n\nنقش (ROLE)\n\nتو یک تحلیلگر حرفه‌ای آنچین، بازارهای مالی و سردبیر یک کانال تخصصی تلگرام هستی.\n\nوظیفه تو ترجمه خبر یا توصیف نمودار نیست؛ بلکه باید مهم‌ترین پیام موجود در داده را استخراج کرده و آن را به یک محتوای کوتاه، حرفه‌ای، روان، آموزشی و مخاطب‌پسند تبدیل کنی.\n\nهمیشه مانند یک تحلیلگر بازار فکر کن، اما مانند یک خبرنگار حرفه‌ای بنویس.\n\n⸻\n\nمأموریت (MISSION)\n\nهدف این کانال انتشار داده‌های مکمل بازار است تا به مخاطبان کمک کند رفتار بازار را بهتر درک کرده و تصمیم‌های آگاهانه‌تری بگیرند.\n\nاین کانال:\n • سیگنال خرید یا فروش ارائه نمی‌دهد.\n • پیش‌بینی قطعی قیمت انجام نمی‌دهد.\n • صرفاً رفتار بازار و سرمایه‌گذاران را بر اساس داده‌ها تحلیل می‌کند.\n • هدف آن آموزش، افزایش درک بازار و ارائه اطلاعات مکمل است.\n\n⸻\n\nورودی (INPUT)\n\nورودی ممکن است شامل یک یا چند مورد از موارد زیر باشد:\n • تصویر نمودار\n • داده آنچین\n • داده اقتصاد کلان (Macro)\n • داده ETF\n • داده بازار مشتقات\n • خبر\n • متن منبع\n • توضیح تحلیل\n • یا ترکیبی از موارد بالا\n\n⸻\n\nمرحله اول | تحلیل داده (Analysis Pipeline)\n\nقبل از نوشتن پاسخ، مراحل زیر را فقط در ذهن خود انجام بده و هرگز آن‌ها را نمایش نده.\n\n⸻\n\n۱. استخراج مهم‌ترین پیام (Key Insight)\n\nابتدا از خودت بپرس:\n\nاگر مخاطب فقط ۱۰ ثانیه برای دیدن این پست وقت داشته باشد، مهم‌ترین چیزی که باید یاد بگیرد چیست؟\n\nتمام متن باید حول همین پیام نوشته شود.\n\n⸻\n\n۲. تشخیص ارزش خبری (News Value)\n\nمشخص کن چرا این داده ارزش انتشار دارد.\n\nبرای مثال:\n • تغییر رفتار سرمایه‌گذاران\n • ورود یا خروج سرمایه\n • تغییر عرضه یا تقاضا\n • تغییر احساسات بازار\n • ثبت رکورد\n • واگرایی\n • فعالیت نهنگ‌ها\n • فعالیت مؤسسات\n • تغییر مهم در اقتصاد کلان\n\nاگر داده ارزش خبری مهمی ندارد، آن را بزرگ‌نمایی نکن.\n\n⸻\n\n۳. تشخیص نوع داده\n\nمشخص کن داده مربوط به کدام دسته است.\n\nبرای مثال:\n • آنچین\n • اقتصاد کلان\n • ETF\n • استیبل‌کوین\n • جریان ورود و خروج صرافی‌ها\n • فعالیت شبکه\n • بازار مشتقات\n • فاندینگ\n • لیکوئیدیشن\n • ماینرها\n • نهنگ‌ها\n • احساسات بازار\n • دیفای\n\nتمام تحلیل باید بر اساس همین دسته انجام شود.\n\n⸻\n\n۴. تشخیص بازیگر اصلی بازار\n\nمشخص کن این داده بیشتر درباره رفتار چه کسی است.\n\nبرای مثال:\n • نهنگ‌ها\n • سرمایه‌گذاران خرد\n • هولدرهای کوتاه‌مدت\n • هولدرهای بلندمدت\n • مؤسسات\n • ETFها\n • ماینرها\n • صرافی‌ها\n\nاگر بازیگر مشخصی وجود ندارد، تحلیل را به رفتار کلی بازار نسبت بده.\n\n⸻\n\n۵. تشخیص مرحله بازار\n\nدر صورت امکان مشخص کن بازار در کدام مرحله قرار دارد.\n\nمانند:\n • انباشت (Accumulation)\n • توزیع (Distribution)\n • تثبیت (Consolidation)\n • بازیابی (Recovery)\n • گسترش روند (Expansion)\n • تسلیم (Capitulation)\n\nاین بخش فقط برای تحلیل داخلی است و نباید نمایش داده شود.\n\n⸻\n\n۶. مفهوم را درک کن، ترجمه نکن\n\nاگر متن انگلیسی وجود داشت:\n • هرگز آن را ترجمه نکن.\n • ابتدا مفهوم را به‌طور کامل درک کن.\n • سپس آن را با زبان طبیعی فارسی بازنویسی کن.\n\nخروجی باید حس یک تحلیل اختصاصی را منتقل کند، نه ترجمه یک خبر.\n\n⸻\n\n۷. تشخیص علت وقوع داده (Context Detection)\n\nاگر منبع، علت وقوع این داده را نیز توضیح داده باشد، بررسی کن که آیا این علت برای درک بهتر تحلیل ضروری است یا خیر.\n\nاگر ضروری بود، آن را در یک جمله کوتاه داخل متن تحلیل بیان کن.\n\nدر غیر این صورت از ذکر آن خودداری کن.\n\nاین توضیح نباید باعث طولانی شدن متن شود.\n\nقوانین تحلیل (Analysis Rules)\n\nدر تمام تحلیل‌ها این اصول را رعایت کن:\n • فقط بر اساس داده‌های موجود تحلیل کن.\n • اطلاعات بدون پشتوانه اضافه نکن.\n • اغراق نکن.\n • رابطه علت و معلولی قطعی ایجاد نکن.\n • از پیش‌بینی قطعی قیمت خودداری کن.\n • هرگز سیگنال خرید یا فروش ارائه نده.\n • اگر داده مبهم است، همان ابهام را صادقانه بیان کن.\n • هدف، توضیح رفتار بازار است؛ نه پیش‌بینی آینده.\n\nبه جای جملات قطعی، از عبارت‌هایی مانند:\n • می‌تواند\n • احتمال دارد\n • در صورت تداوم\n • ممکن است\n • نشان می‌دهد\n • حاکی از آن است\n\nاستفاده کن.\n\n⸻\n\nقوانین نگارش (Writing Style)\n\nمتن باید:\n • روان و طبیعی باشد.\n • شبیه نوشته یک تحلیلگر حرفه‌ای باشد.\n • شبیه ترجمه نباشد.\n • شبیه متن تولیدشده توسط هوش مصنوعی نباشد.\n • هر جمله ارزش اطلاعاتی جدیدی اضافه کند.\n • مستقیماً قابل انتشار در تلگرام باشد.\n • ساده اما تخصصی باشد.\n • برای مخاطب عمومی نیز قابل فهم باشد.\n\nاز موارد زیر خودداری کن:\n • اغراق\n • جملات کلیشه‌ای\n • توضیح اضافه\n • تکرار یک مفهوم با بیان‌های مختلف\n • اصطلاحات پیچیده غیرضروری\n • لحن دستوری یا تبلیغاتی\nهمیشه ساده، شفاف و حرفه‌ای بنویس.\n\n⸻\n\nاصل ایجاز (Brevity Rule)\n\nهدف، انتقال سریع پیام اصلی است.\n\nپس از پایان نگارش:\n\nیک بار متن را مانند یک سردبیر حرفه‌ای بازبینی کن.\n\nهر کلمه، جمله یا عبارتی که بدون تغییر پیام اصلی قابل حذف است، حذف کن.\n\nقوانین:\n • هر پاراگراف حداکثر ۲ تا ۳ خط تلگرام باشد.\n • کل متن در کمتر از ۱۵ ثانیه قابل مطالعه باشد.\n • وضوح و روانی را به کامل بودن ترجیح بده.\n • هر جمله فقط یک پیام را منتقل کند.\n • از تکرار خودداری کن.\n • اگر بین کامل بودن و روان بودن مجبور به انتخاب شدی، روان بودن را انتخاب کن.\n\n⸻\n\nساختار خروجی (Output Structure)\n\n📊 عنوان\n\nعنوان باید:\n • حداکثر ۶ کلمه باشد.\n • کوتاه باشد.\n • جذاب باشد.\n • مهم‌ترین پیام داده را منتقل کند.\n • حس کلیک‌بیتی یا اغراق‌آمیز نداشته باشد.\n\n⸻\n\nمتن تحلیل\n\nدر ۲ یا ۳ جمله کوتاه توضیح بده:\n • چه اتفاقی افتاده است؟\n • چرا این اتفاق مهم است؟\n • این داده چه برداشتی از رفتار بازار یا سرمایه‌گذاران ارائه می‌دهد؟\n\nاولین جمله مهم‌ترین جمله کل متن است.\n\nمخاطب باید فقط با خواندن اولین جمله، بدون نیاز به ادامه متن، مهم‌ترین پیام داده را متوجه شود.\n\nسپس در جمله‌های بعدی، دلیل اهمیت داده و برداشت تحلیلی را توضیح بده.\n\nاطلاعات نمودار را صرفاً تکرار نکن؛ آن را تفسیر کن.\n\nاگر علت وقوع داده از منبع مشخص است و به درک بهتر مخاطب کمک می‌کند، آن را فقط در یک جمله کوتاه اضافه کن.\n\n⸻\n\nلحن نگارش\n\nمتن باید:\n • خبری باشد.\n • روان باشد.\n • قابل فهم برای عموم باشد.\n • در عین سادگی، حرفه‌ای باشد.\n • حس کند یک تحلیلگر بازار آن را نوشته است.\n • از اصطلاحات سنگین دانشگاهی دوری کند.\n\n⸻\n\nاستفاده از ایموجی\n\nفقط از ایموجی‌های مرتبط استفاده کن.\n\nایموجی‌ها باید به خوانایی کمک کنند، نه اینکه متن را شلوغ کنند.\n\nدر هر پست معمولاً این ساختار کافی است:\n\n📊 عنوان\n\n🎯 جمع‌بندی\n\n🎓 آموزش\n\nاز استفاده بیش از حد از ایموجی خودداری کن.\n\n🎯 جمع‌بندی (Market Impact)\n\nدر یک یا دو جمله کوتاه، ابتدا اثر اصلی این داده بر رفتار بازار یا سرمایه‌گذاران را توضیح بده و سپس، در صورت وجود، مهم‌ترین فرصت یا ریسک ناشی از این داده را بیان کن.\n\nهمیشه این ساختار ذهنی را دنبال کن:\n 1. این داده چه تغییری در رفتار بازار یا سرمایه‌گذاران نشان می‌دهد؟\n 2. مهم‌ترین فرصت یا ریسک احتمالی ناشی از این تغییر چیست؟\n\nاگر داده فقط نشان‌دهنده فرصت یا فقط نشان‌دهنده ریسک است، فقط همان مورد را بیان کن و از ایجاد تعادل مصنوعی خودداری کن.\n\nدر صورت مناسب بودن، از ساختار زیر استفاده کن:\n\nاگر این روند ادامه پیدا کند، می‌تواند…\n\nاز موارد زیر خودداری کن:\n • پیش‌بینی قیمت\n • سیگنال خرید یا فروش\n • جملات کلیشه‌ای مانند:\n • «برای تأیید این سناریو باید…»\n • «باید منتظر داده‌های بعدی بود…»\n • «بررسی سایر شاخص‌ها ضروری است…»\n • «همه‌چیز به داده‌های بعدی بستگی دارد…»\n\nجمع‌بندی باید به مخاطب کمک کند اهمیت داده را درک کند، نه اینکه به جای او تصمیم بگیرد.\n\n⸻\n\n🧭 قانون تأثیر بر تصمیم‌گیری (Decision Impact Rule)\n\nهدف جمع‌بندی، کمک به تصمیم‌گیری مخاطب است؛ نه تصمیم گرفتن به جای او.\n\nپس از خواندن جمع‌بندی، مخاطب باید بتواند پاسخ این سه سؤال را بداند:\n • چرا این داده مهم است؟\n • این داده چه تغییری در رفتار بازار یا سرمایه‌گذاران ایجاد کرده است؟\n • مهم‌ترین فرصت یا ریسک احتمالی ناشی از این داده چیست؟\n\nاما هرگز نباید احساس کند که متن او را به خرید، فروش یا انجام معامله تشویق می‌کند.\n\n⸻\n\n🎓 آموزش\n\nاین بخش همیشه Bold باشد.\n\nدر دو جمله کوتاه و ساده توضیح بده:\n • این شاخص چه چیزی را اندازه‌گیری می‌کند.\n • چرا معامله‌گران و سرمایه‌گذاران آن را دنبال می‌کنند.\n\nهدف این بخش آموزش مخاطب است، نه ادامه تحلیل.\n\nطوری بنویس که حتی فردی که برای اولین بار با این شاخص آشنا می‌شود نیز مفهوم آن را درک کند.\n\n⸻\n\n📚 اصطلاحات تخصصی (Terminology Rule)\n\nهر زمان لازم است از نام یک شاخص، متریک یا اصطلاح انگلیسی استفاده شود:\n • ابتدا معادل فارسی را بنویس.\n • سپس نام انگلیسی را داخل پرانتز قرار بده.\n • از شروع جمله با کلمات انگلیسی خودداری کن.\n • از ترکیب مستقیم کلمات فارسی و انگلیسی در یک عبارت (مانند ETF Flow نشان می‌دهد…) پرهیز کن تا مشکل نمایش راست‌به‌چپ (RTL/LTR) ایجاد نشود.\n • پس از معرفی اصطلاح، ادامه جمله کاملاً فارسی نوشته شود.\n\nنمونه صحیح\n • جریان ورود و خروج سرمایه به ETFها (ETF Flow) نشان می‌دهد چه میزان سرمایه وارد یا خارج صندوق‌های قابل معامله شده است.\n • شاخص سود و زیان تحقق‌نیافته (NUPL) میزان سود یا زیان تحقق‌نیافته سرمایه‌گذاران را اندازه‌گیری می‌کند.\n • نسبت ارزش بازار به ارزش تحقق‌یافته (MVRV) وضعیت سود یا زیان میانگین سرمایه‌گذاران را نشان می‌دهد.\n• حجم خرید تهاجمی (Taker Buy Volume) میزان خریدهای انجام‌شده با سفارش‌های بازار را نمایش می‌دهد.\n\nنمونه نادرست\n • ETF Flow نشان می‌دهد…\n • MVRV افزایش یافته است…\n • NUPL نشان می‌دهد…\n\nدر صورت امکان، اصطلاح انگلیسی فقط یک‌بار در بخش 🎓 آموزش معرفی شود و در سایر بخش‌های متن از معادل فارسی یا عبارت رایج استفاده شود؛ مگر اینکه برای جلوگیری از ابهام، تکرار آن ضروری باشد.\n\n⸻\n\n🚫 مواردی که هرگز نباید در خروجی دیده شوند\n\nاز موارد زیر خودداری کن:\n • ترجمه تحت‌اللفظی متن انگلیسی\n • اغراق در اهمیت داده\n • جملات کلیشه‌ای\n • تحلیل‌های طولانی\n • تکرار اطلاعات نمودار\n • اصطلاحات پیچیده بدون توضیح\n • سیگنال خرید یا فروش\n • پیش‌بینی قطعی قیمت\n • توصیه سرمایه‌گذاری\n • استفاده بیش از حد از ایموجی\n • پاراگراف‌های طولانی\n\n⸻\n\n✅ کنترل کیفیت (Editorial Review)\n\nقبل از ارسال پاسخ، این موارد را بررسی کن:\n • آیا مهم‌ترین پیام در همان اولین جمله منتقل شده است؟\n • آیا عنوان کوتاه، واضح و جذاب است؟\n • آیا متن در کمتر از ۱۵ ثانیه قابل مطالعه است؟\n • آیا هر پاراگراف حداکثر ۲ تا ۳ خط تلگرام است؟\n • آیا هر جمله ارزش اطلاعاتی جدیدی اضافه می‌کند؟\n • آیا جمله یا عبارتی وجود دارد که بدون تغییر پیام اصلی قابل حذف باشد؟\n • آیا متن روان، طبیعی و شبیه نوشته یک تحلیلگر انسانی است؟\n • آیا متن شبیه ترجمه یا متن تولیدشده توسط هوش مصنوعی نیست؟\n • آیا مهم‌ترین اثر این داده بر رفتار بازار به‌وضوح بیان شده است؟\n • آیا مهم‌ترین فرصت یا ریسک احتمالی (در صورت وجود) بیان شده است؟\n • آیا متن هیچ سیگنال خرید یا فروش یا پیش‌بینی قطعی قیمت ارائه نمی‌دهد؟\n • آیا بخش 🎓 آموزش مفهوم شاخص را ساده، دقیق و قابل فهم توضیح می‌دهد؟\n • آیا متن بدون هیچ تغییری آماده انتشار مستقیم در تلگرام است؟\n\nاگر پاسخ هر یک از موارد بالا منفی بود، متن را بازنویسی کن.\n\n⸻\n\n📄 قالب نهایی خروجی\n\n📊 عنوان کوتاه و جذاب\n\n(۲ تا ۳ جمله تحلیل کوتاه)\n\n🎯 جمع‌بندی\n\n(۱ تا ۲ جمله درباره اثر احتمالی داده بر رفتار بازار و مهم‌ترین فرصت یا ریسک)\n\n🎓 آموزش\n\n(در دو جمله کوتاه توضیح بده این شاخص چه چیزی را اندازه‌گیری می‌کند و چرا اهمیت دارد.)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -688,
+        16
+      ],
+      "id": "20cf8241-49a3-464b-be98-29c84969900d",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "deepseek-v4-flash",
+          "mode": "list",
+          "cachedResultName": "deepseek-v4-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -656,
+        208
+      ],
+      "id": "8a63fd09-f47e-409f-81dd-6126d5b0218c",
+      "name": "fallback model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "Configure your openAiApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "gemini-2.5-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -768,
+        208
+      ],
+      "id": "f2894042-9ac3-49e1-97a3-07a4104238e4",
+      "name": "main model",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "Configure your openAiApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Code in JavaScript').first().json.message }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "bef5468c-ea79-4600-9d37-8a722a9dee94"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "message"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ba8e1301-e610-449e-866d-c7ab1aa44a5a",
+                    "leftValue": "={{ $('Code in JavaScript').first().json.callback_query }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "query"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1744,
+        576
+      ],
+      "id": "5d49810a-45df-4b54-8ba8-90310f329f59",
+      "name": "message or query"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ ['onchain_analytics', 'glassnode_alerts', 'cryptoquant_feed', 'santiment_feed'].includes( $('Code in JavaScript').first().json.message?.forward_origin?.chat?.username || $('Code in JavaScript').first().json.callback_query?.message?.reply_to_message?.forward_from_chat?.username || 'unknown_channel' ) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "cb3a75a0-45f5-4b15-bd26-8bdf7212547c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "آنچین"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "dee80563-6b7c-4c8c-862c-595df068521a",
+                    "leftValue": "={{ ['crypto_news_feed', 'cointelegraph_feed'].includes( $('Code in JavaScript').first().json.message?.forward_origin?.chat?.username || $('Code in JavaScript').first().json.callback_query?.message?.reply_to_message?.forward_from_chat?.username || 'unknown_channel' ) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "خبر"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "356d718c-6116-4532-a344-74a30f3cb2e3",
+                    "leftValue": "={{ ['cryptorank_feed', 'market_overview_channel'].includes( $('Code in JavaScript').first().json.message?.forward_origin?.chat?.username || $('Code in JavaScript').first().json.callback_query?.message?.reply_to_message?.forward_from_chat?.username || 'unknown_channel' ) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "نمای کلی کریپتو"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fe7da7a4-1dfb-4ba6-a0ec-83d6af610638",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1488,
+        544
+      ],
+      "id": "12a1c388-6504-4d4d-a3a2-719973744bb0",
+      "name": "Channels"
+    },
+    {
+      "parameters": {
+        "jsCode": "// استخراج داینامیک فایل و متن از callback_query برای n8n\n\nconst items = $('Telegram Trigger').all();\n\nfor (const item of items) {\n\n  // پیدا کردن پیام\n  const msg =\n    item.json.callback_query?.message ||\n    item.json.message ||\n    item.json.channel_post ||\n    item.json;\n\n  let fileId = null;\n  let mediaType = \"text\";\n\n  // تشخیص نوع فایل\n  if (msg.photo?.length) {\n    fileId = msg.photo[msg.photo.length - 1].file_id;\n    mediaType = \"photo\";\n\n  } else if (msg.video) {\n    fileId = msg.video.file_id;\n    mediaType = \"video\";\n\n  } else if (msg.audio) {\n    fileId = msg.audio.file_id;\n    mediaType = \"audio\";\n\n  } else if (msg.voice) {\n    fileId = msg.voice.file_id;\n    mediaType = \"voice\";\n\n  } else if (msg.document) {\n    fileId = msg.document.file_id;\n    mediaType = \"document\";\n\n  } else if (msg.animation) {\n    fileId = msg.animation.file_id;\n    mediaType = \"animation\";\n  }\n\n  // متن یا کپشن\n  const textContent = msg.caption || msg.text || \"\";\n\n  item.json.my_data = {\n    has_media: fileId !== null,\n    media_type: mediaType,\n    file_id: fileId,\n    media_group_id: msg.media_group_id || null,\n    text_content: textContent,\n    is_album_part_without_text: !!(msg.media_group_id && !textContent),\n\n    // اطلاعات callback\n    callback_data: item.json.callback_query?.data || null,\n    callback_id: item.json.callback_query?.id || null,\n    clicked_by: item.json.callback_query?.from?.id || null,\n    message_id: msg.message_id,\n    chat_id: msg.chat?.id || null\n  };\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2912,
+        1168
+      ],
+      "id": "7c4bc5c8-d8f2-4d32-ab5e-38747d1239e5",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// 🌟 استخراج کاملاً ایمن و هوشمند: جلوگیری از کرش کردن n8n\nlet node1 = null;\nlet node6 = null;\n\ntry { node1 = $('Code in JavaScript').first().json; } catch(e) {}\ntry { node6 = $('Code in JavaScript6').first().json; } catch(e) {}\n\n// بررسی دقیق: کُدام نود واقعاً اطلاعات فایل (my_data) را دارد؟\nlet sourceNode = {};\nif (node6 && node6.my_data) {\n    // اگر در مسیر دکمه‌ها هستیم و نود ۶ دیتا دارد، حتماً این را انتخاب کن\n    sourceNode = node6; \n} else if (node1 && node1.my_data) {\n    // اگر در مسیر پیام جدید هستیم\n    sourceNode = node1; \n} else {\n    // حالت پیش‌فرض (فال‌بک نهایی)\n    sourceNode = node1 || node6 || {};\n}\n\nfor (let i = 0; i < items.length; i++) {\n  \n  // ۱. دریافت متغیرهای اصلی مستقیماً از نود انتخاب شده\n  let chatId = sourceNode.message?.from?.id || sourceNode.message?.chat?.id || sourceNode.callback_query?.message?.chat?.id; \n  let replyToId = sourceNode.message?.message_id || sourceNode.callback_query?.message?.reply_to_message?.message_id;\n  \n  // استخراج اطلاعات فایل و متن \n  // 🌟 استخراج متن خام\n  let rawTextContent = items[i].json.cleaned || sourceNode.my_data?.text_content || sourceNode.original_text || \"\";\n  \n  // 🌟 اضافه کردن محتوای استاتیک بالا و پایین\n  let footerText = \"\\n\\n━━━━━━━━━━━━━━\\n📢 کانال اخبار و تحلیل کریپتو\\n🆔 @YourChannel\";\n  \n  // ترکیب نهایی متن (اگر متن خام خالی بود، فقط استاتیک‌ها ارسال میشن)\n  let textContent = `${rawTextContent}${footerText}`;\n  let mediaType = sourceNode.my_data?.media_type || \"text\";\n  let fileId = sourceNode.my_data?.file_id || null;\n  let mediaGroupId = sourceNode.my_data?.media_group_id || null; // 🌟 متغیر تشخیص آلبوم\n\n  let endpoint = \"sendMessage\";\n  let payload = {\n    chat_id: chatId,\n    reply_to_message_id: replyToId, // ریپلای روی پیام اصلی\n    reply_markup: {\n      inline_keyboard: [\n        [\n          { text: \"✅ تایید و ارسال به کانال\", callback_data: \"approve\", style: \"success\" }\n        ],\n        [\n          { text: \"🔄 رد و بازتولید\", callback_data: \"reject\", style: \"danger\" }\n        ]\n      ]\n    }\n  };\n\n  // ۲. تصمیم‌گیری هوشمندانه بر اساس نوع محتوا\n  if (fileId && mediaType !== \"text\") {\n    \n    if (mediaGroupId) {\n      // 🚨 حالت آلبوم: فقط یک پیام متنی می‌سازیم که روی عکس اول آلبوم ریپلای می‌شود\n      endpoint = \"sendMessage\";\n      payload.text = textContent;\n    } else {\n      // 🖼 حالت فایل تکی: دکمه زیر عکس/ویدیو قرار می‌گیرد\n      payload.caption = textContent; \n      \n      switch (mediaType) {\n        case \"photo\": endpoint = \"sendPhoto\"; payload.photo = fileId; break;\n        case \"video\": endpoint = \"sendVideo\"; payload.video = fileId; break;\n        case \"voice\": endpoint = \"sendVoice\"; payload.voice = fileId; break;\n        case \"audio\": endpoint = \"sendAudio\"; payload.audio = fileId; break;\n        case \"document\": endpoint = \"sendDocument\"; payload.document = fileId; break;\n        case \"animation\": endpoint = \"sendAnimation\"; payload.animation = fileId; break;\n      }\n    }\n    \n  } else {\n    // 📝 حالت متن خالی\n    endpoint = \"sendMessage\";\n    payload.text = textContent;\n  }\n\n  // ۳. اضافه کردن خروجی نهایی برای نود HTTP Request\n  items[i].json.api_endpoint = endpoint;\n  items[i].json.api_payload = payload;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        304
+      ],
+      "id": "a6aacc4c-e28b-42b1-ab85-a9591be7afb1",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        304
+      ],
+      "id": "bd28557e-ef63-43cd-bd66-ccfcd6fb0ffb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.my_data.callback_data }}",
+                    "rightValue": "approve",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c7140811-22e7-4c0e-852c-80e1f193dd41"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "approve"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6c6c1e83-0ced-43be-a843-97eceee2106c",
+                    "leftValue": "={{ $json.my_data.callback_data }}",
+                    "rightValue": "reject",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reject"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "4f421ceb-263c-4004-b946-0a9627079557",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2640,
+        1152
+      ],
+      "id": "3124928a-ab50-4d13-9b7c-fe543fd26541",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ۱. استخراج اطلاعات کلیک روی دکمه، از نود قبل از دیتابیس\nconst sourceData = $('Code in JavaScript3').first().json;\nconst cb = sourceData.callback_query;\nconst targetChannel = \"YOUR_TARGET_CHANNEL_ID\";\n\n// بررسی وجود پیام اصلی\nconst originalMsg = cb.message.reply_to_message;\nlet mediaGroupId = originalMsg.media_group_id;\n\nlet endpoint = \"copyMessage\";\nlet payload = {\n  chat_id: targetChannel,\n  from_chat_id: cb.message.chat.id,\n  message_id: originalMsg.message_id\n};\n\nlet botText = cb.message.text || cb.message.caption || \"\";\nlet approvedText = botText\n  .replace(\"🖼 **آلبوم دریافت شد.**\\n\\n📝 متن پیشنهادی هوش مصنوعی برای کپشن:\\n\\n\", \"\")\n  .replace(\"🖼 **آلبوم بدون کپشن دریافت شد.**\\nجهت ارسال مستقیم به کانال تایید کنید.\", \"\");\n\n// ۲. استخراج ردیف‌های دیتابیس (که ورودی مستقیم این نود هستند)\nlet albumRows = [];\nif (mediaGroupId) {\n   albumRows = $input.all().map(item => item.json);\n}\n\nif (mediaGroupId && albumRows.length > 0) {\n  // مرتب‌سازی عکس‌ها بر اساس ترتیب ارسالشان به ربات\n  albumRows.sort((a, b) => a.message_id - b.message_id);\n\n  let mediaArray = albumRows.map(row => ({\n    type: row.media_type,\n    media: row.file_id\n  }));\n\n  if (approvedText.trim() !== \"\") {\n    mediaArray[0].caption = approvedText;\n  }\n\n  endpoint = \"sendMediaGroup\";\n  payload = {\n    chat_id: targetChannel,\n    media: mediaArray\n  };\n} else if (originalMsg.photo || originalMsg.video || originalMsg.document || originalMsg.voice || originalMsg.audio) {\n  payload.caption = approvedText;\n} else {\n  endpoint = \"sendMessage\";\n  payload = {\n    chat_id: targetChannel,\n    text: approvedText\n  };\n}\n\n// ۳. برگرداندن فقط یک خروجی تا درخواست ارسال به تلگرام فقط یک‌بار اجرا شود (نه به تعداد عکس‌های آلبوم)\nreturn [{\n  json: {\n    api_endpoint: endpoint,\n    api_payload: payload,\n    media_group_id_for_cleanup: mediaGroupId,\n    bot_chat_id: cb.message.chat.id,\n    bot_message_id: cb.message.message_id\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2096,
+        1136
+      ],
+      "id": "029b2054-71ef-4966-a5d3-068185f3d2ce",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1888,
+        1136
+      ],
+      "id": "29cf457c-9a32-44a8-b68d-4cf612241f8a",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/editMessageReplyMarkup",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $('Code in JavaScript5').first().json.bot_chat_id }}\",\n  \"message_id\": {{ $('Code in JavaScript5').first().json.bot_message_id }},\n  \"reply_markup\": {\n    \"inline_keyboard\": []\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1280,
+        1136
+      ],
+      "id": "e2f825b5-2f81-4d1a-b8b7-a69d16c0b5fb",
+      "name": "HTTP Request2",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\nfor (let i = 0; i < items.length; i++) {\n  const cb = items[i].json.callback_query;\n  const originalMsg = cb.message.reply_to_message;\n\n  const originalText = originalMsg.caption || originalMsg.text || \"\";\n\n  let fileId = null;\n  let mediaType = \"text\";\n  if (originalMsg.photo?.length) { fileId = originalMsg.photo[originalMsg.photo.length - 1].file_id; mediaType = \"photo\"; }\n  else if (originalMsg.video) { fileId = originalMsg.video.file_id; mediaType = \"video\"; }\n  else if (originalMsg.audio) { fileId = originalMsg.audio.file_id; mediaType = \"audio\"; }\n  else if (originalMsg.voice) { fileId = originalMsg.voice.file_id; mediaType = \"voice\"; }\n  else if (originalMsg.document) { fileId = originalMsg.document.file_id; mediaType = \"document\"; }\n  else if (originalMsg.animation) { fileId = originalMsg.animation.file_id; mediaType = \"animation\"; }\n\n  items[i].json.original_text = originalText;\n  items[i].json.bot_message_id = cb.message.message_id;\n  items[i].json.chat_id = cb.message.chat.id;\n  items[i].json.has_media = fileId !== null;\n\n  items[i].json.my_data = {\n    has_media: fileId !== null,\n    media_type: mediaType,\n    file_id: fileId,\n    media_group_id: originalMsg.media_group_id || null,\n    text_content: originalText,\n    is_album_part_without_text: false\n  };\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2640,
+        992
+      ],
+      "id": "827c543a-c511-4da6-bcb6-452a05465929",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Code in JavaScript3').first().json.callback_query.from.id }}",
+        "text": "✅ محتوا با موفقیت داخل کانال منتشر شد!",
+        "additionalFields": {
+          "appendAttribution": false,
+          "reply_to_message_id": "={{ $('Code in JavaScript').first().json.callback_query.message.message_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1488,
+        1136
+      ],
+      "id": "d552419a-ec24-4183-a88f-fbbd5d4dc4bb",
+      "name": "Send a text message1",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Configure your telegramApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a05a10b0-7ae7-4c5e-83e1-7eb6e267029f",
+              "leftValue": "={{ $('Code in JavaScript').first().json.my_data.is_album_part_without_text === false }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2192,
+        576
+      ],
+      "id": "acfd982d-f5c8-4cc2-9e06-7917fa51f6e7",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3cd30c52-1fc2-443d-b189-071ba9179077",
+              "leftValue": "={{ $('Code in JavaScript').first().json.message?.media_group_id || $('Code in JavaScript').first().json.callback_query?.message?.reply_to_message?.media_group_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2640,
+        576
+      ],
+      "id": "b540411e-9a2a-4930-918d-e059014542dc",
+      "name": "Has media_group_id?"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "9sL59gt2QhRyXpLZ",
+          "mode": "list",
+          "cachedResultName": "telegram_album_parts",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/9sL59gt2QhRyXpLZ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "media_group_id": "={{ $json.my_data.media_group_id }}",
+            "message_id": "={{ $json.my_data.message_id }}",
+            "media_type": "={{ $json.my_data.media_type }}",
+            "file_id": "={{ $json.my_data.file_id }}",
+            "chat_id": "={{ $json.my_data.chat_id }}",
+            "text_content": "={{ $json.my_data.text_content }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "media_group_id",
+              "displayName": "media_group_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "media_type",
+              "displayName": "media_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "file_id",
+              "displayName": "file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "text_content",
+              "displayName": "text_content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2432,
+        576
+      ],
+      "id": "394a2c95-d80d-4297-978c-efc953c17614",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1984,
+        576
+      ],
+      "id": "e9a92e1b-c5fd-4124-89ce-424c3d9c0c52",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9sL59gt2QhRyXpLZ",
+          "mode": "list",
+          "cachedResultName": "telegram_album_parts",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/9sL59gt2QhRyXpLZ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "media_group_id",
+              "keyValue": "={{ $json.my_data.callback_data }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2336,
+        1136
+      ],
+      "id": "901c1b82-a229-4eda-b512-11c98beade04",
+      "name": "Get Album Rows"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9sL59gt2QhRyXpLZ",
+          "mode": "list",
+          "cachedResultName": "telegram_album_parts",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/9sL59gt2QhRyXpLZ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "media_group_id",
+              "keyValue": "={{ $('Code in JavaScript5').first().json.media_group_id_for_cleanup }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1680,
+        1136
+      ],
+      "id": "a9b3cf82-46bf-465b-b7d3-020ad640c9a0",
+      "name": "Delete row(s)",
+      "retryOnFail": true,
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a517cad8-1b08-4e17-96ed-acbf14049f4d",
+              "leftValue": "={{ $json.my_data.has_media }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "35e3fd6f-11f7-4d83-8f49-c583ce1ad787",
+              "leftValue": "={{ $json.my_data.text_content.trim() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "30b6f147-480b-4801-8398-22529265d8e4",
+              "leftValue": "={{ $json.my_data.media_group_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2912,
+        576
+      ],
+      "id": "71aa1c21-25c9-42b6-8e41-f4f3106444b2",
+      "name": "Media without caption?"
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\nfor (let i = 0; i < items.length; i++) {\n  const d = items[i].json.my_data;\n\n  let chatId = items[i].json.message?.from?.id || d.chat_id;\n\n  let endpoint = \"sendMessage\";\n  let payload = {\n    chat_id: chatId,\n    reply_to_message_id: d.message_id,\n    reply_markup: {\n      inline_keyboard: [\n        [ { text: \"✅ تایید و ارسال به کانال\", callback_data: \"approve\" } ]\n      ]\n    }\n  };\n\n  switch (d.media_type) {\n    case \"photo\": endpoint = \"sendPhoto\"; payload.photo = d.file_id; break;\n    case \"video\": endpoint = \"sendVideo\"; payload.video = d.file_id; break;\n    case \"voice\": endpoint = \"sendVoice\"; payload.voice = d.file_id; break;\n    case \"audio\": endpoint = \"sendAudio\"; payload.audio = d.file_id; break;\n    case \"document\": endpoint = \"sendDocument\"; payload.document = d.file_id; break;\n    case \"animation\": endpoint = \"sendAnimation\"; payload.animation = d.file_id; break;\n  }\n\n  items[i].json.api_endpoint = endpoint;\n  items[i].json.api_payload = payload;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2640,
+        368
+      ],
+      "id": "1cf20773-ed40-456e-ba18-e67695fa07f5",
+      "name": "Build No-Caption Payload"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.result.chat.id }}",
+        "text": "⚠️ این محتوا کپشن متنی ندارد.",
+        "additionalFields": {
+          "appendAttribution": false,
+          "reply_to_message_id": "={{ $json.result.message_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2224,
+        368
+      ],
+      "id": "ea735570-53ed-4ee8-91c8-d1468fc694c8",
+      "name": "Send a text message",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Configure your telegramApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2416,
+        368
+      ],
+      "id": "f11efcaf-d9f5-4e34-891a-2138b5763d56",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dc8246b7-7d3b-4efd-a167-98a26cabf56c",
+              "leftValue": "={{ $('Code in JavaScript').first().json?.my_data?.media_group_id || $('Code in JavaScript').first().json?.message?.media_group_id || $('Code in JavaScript').first().json?.callback_query?.message?.reply_to_message?.media_group_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "5c2bb868-0959-46c5-a988-3141b8fb7c14",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// 🌟 استخراج کاملاً ایمن و هوشمند: جلوگیری از کرش کردن n8n\nlet node1 = null;\nlet node6 = null;\n\ntry { node1 = $('Code in JavaScript').first().json; } catch(e) {}\ntry { node6 = $('Code in JavaScript6').first().json; } catch(e) {}\n\n// بررسی دقیق: کُدام نود واقعاً اطلاعات فایل (my_data) را دارد؟\nlet sourceNode = {};\nif (node6 && node6.my_data) {\n    // اگر در مسیر دکمه‌ها هستیم و نود ۶ دیتا دارد، حتماً این را انتخاب کن\n    sourceNode = node6; \n} else if (node1 && node1.my_data) {\n    // اگر در مسیر پیام جدید هستیم\n    sourceNode = node1; \n} else {\n    // حالت پیش‌فرض (فال‌بک نهایی)\n    sourceNode = node1 || node6 || {};\n}\n\nfor (let i = 0; i < items.length; i++) {\n  \n  // ۱. دریافت متغیرهای اصلی مستقیماً از نود انتخاب شده\n  let chatId = sourceNode.message?.from?.id || sourceNode.message?.chat?.id || sourceNode.callback_query?.message?.chat?.id; \n  let replyToId = sourceNode.message?.message_id || sourceNode.callback_query?.message?.reply_to_message?.message_id;\n  \n  // استخراج اطلاعات فایل و متن \n  // 🌟 استخراج متن خام\n  let rawTextContent = items[i].json.cleaned || sourceNode.my_data?.text_content || sourceNode.original_text || \"\";\n  \n  // 🌟 اضافه کردن محتوای استاتیک بالا و پایین\n  let headerText = \"🚨خبر\\n\\n\";\n  let footerText = \"\\n\\n━━━━━━━━━━━━━━\\n📢 کانال اخبار و تحلیل کریپتو\\n🆔 @YourChannel\";\n  \n  // ترکیب نهایی متن (اگر متن خام خالی بود، فقط استاتیک‌ها ارسال میشن)\n  let textContent = `${headerText}${rawTextContent}${footerText}`;\n  let mediaType = sourceNode.my_data?.media_type || \"text\";\n  let fileId = sourceNode.my_data?.file_id || null;\n  let mediaGroupId = sourceNode.my_data?.media_group_id \n  || node1?.message?.media_group_id \n  || node1?.callback_query?.message?.reply_to_message?.media_group_id \n  || null; // 🌟 متغیر تشخیص آلبوم\n\n  let endpoint = \"sendMessage\";\n  let payload = {\n    chat_id: chatId,\n    reply_to_message_id: replyToId, // ریپلای روی پیام اصلی\n    reply_markup: {\n      inline_keyboard: [\n        [\n          { text: \"✅ تایید و ارسال به کانال\", callback_data: mediaGroupId ? String(mediaGroupId) : \"approve\", style: \"success\" }\n        ],\n        [\n          { text: \"🔄 رد و بازتولید\", callback_data: \"reject\", style: \"danger\" }\n        ]\n      ]\n    }\n  };\n\n  // ۲. تصمیم‌گیری هوشمندانه بر اساس نوع محتوا\n  if (fileId && mediaType !== \"text\") {\n    \n    if (mediaGroupId) {\n      // 🚨 حالت آلبوم: فقط یک پیام متنی می‌سازیم که روی عکس اول آلبوم ریپلای می‌شود\n      endpoint = \"sendMessage\";\n      payload.text = textContent;\n    } else {\n      // 🖼 حالت فایل تکی: دکمه زیر عکس/ویدیو قرار می‌گیرد\n      payload.caption = textContent; \n      \n      switch (mediaType) {\n        case \"photo\": endpoint = \"sendPhoto\"; payload.photo = fileId; break;\n        case \"video\": endpoint = \"sendVideo\"; payload.video = fileId; break;\n        case \"voice\": endpoint = \"sendVoice\"; payload.voice = fileId; break;\n        case \"audio\": endpoint = \"sendAudio\"; payload.audio = fileId; break;\n        case \"document\": endpoint = \"sendDocument\"; payload.document = fileId; break;\n        case \"animation\": endpoint = \"sendAnimation\"; payload.animation = fileId; break;\n      }\n    }\n    \n  } else {\n    // 📝 حالت متن خالی\n    endpoint = \"sendMessage\";\n    payload.text = textContent;\n  }\n\n  // ۳. اضافه کردن خروجی نهایی برای نود HTTP Request\n  items[i].json.api_endpoint = endpoint;\n  items[i].json.api_payload = payload;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "92b7cc66-a1b8-44aa-a11d-8edf3275f807",
+      "name": "Code in JavaScript9"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        0
+      ],
+      "id": "57aa8fb4-7345-4ff6-93e3-c2719f0af231",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1904,
+        272
+      ],
+      "id": "5e7227c1-35e4-42ee-a13f-2798f9beba6f",
+      "name": "Wait1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9sL59gt2QhRyXpLZ",
+          "mode": "list",
+          "cachedResultName": "telegram_album_parts",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/9sL59gt2QhRyXpLZ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "media_group_id",
+              "keyValue": "={{ $('Insert row').first().json.media_group_id }}"
+            }
+          ]
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1680,
+        272
+      ],
+      "id": "789944dd-fa19-44ef-aefe-1e5daa9245b1",
+      "name": "Get Album Rows (No Caption)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const node1 = $('Code in JavaScript').first().json;\nconst currentMsgId = node1.my_data.message_id;\nconst mediaGroupId = node1.my_data.media_group_id;\nconst chatId = node1.my_data.chat_id;\n\nconst rows = $input.all().map(i => i.json);\nif (rows.length === 0) return [];\n\nconst maxId = Math.max(...rows.map(r => Number(r.message_id)));\n\n// فقط اگر من آخرین عکس آلبوم هستم ادامه بده\nif (Number(currentMsgId) < maxId) {\n  return [];\n}\n\n// 🌟 چک جدید: اگر هر کدام از عکس‌های آلبوم کپشن داشته باشند، این پیام نباید ارسال شود\n// چون مسیر دیگری (AI Agent) قبلاً دارد پیام تایید/رد را با کپشن واقعی می‌فرستد\nconst hasCaption = rows.some(r => r.text_content && r.text_content.trim() !== \"\");\nif (hasCaption) {\n  return [];\n}\n\nrows.sort((a, b) => a.message_id - b.message_id);\nconst anchorMsgId = rows[0].message_id;\n\nreturn [{\n  json: {\n    api_endpoint: \"sendMessage\",\n    api_payload: {\n      chat_id: chatId,\n      reply_to_message_id: anchorMsgId,\n      text: \"@testme | پروژه نهایی\",\n      reply_markup: {\n        inline_keyboard: [\n          [ { text: \"✅ تایید و ارسال به کانال\", callback_data: $('Code in JavaScript').first().json.my_data.media_group_id } ]\n        ]\n      }\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1472,
+        272
+      ],
+      "id": "adb50cc8-24e8-4682-9d09-a8a6b91af123",
+      "name": "Build Album No-Caption Payload"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $if($('Code in JavaScript').isExecuted, $('Code in JavaScript').first().json.my_data?.text_content, '') || $if($('Code in JavaScript6').isExecuted, $('Code in JavaScript6').first().json.original_text, '') || 'کپشنی نداریم پس کپشنی تولید نکن' }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are an elite, highly precise journalist and Telegram content editor.\n\n[CORE OBJECTIVE]\nThe primary objective is maximizing information density while preserving factual accuracy and readability. \nPriority order: Factual Accuracy > Meaning Preservation > Readability > Formatting.\n\n[INPUT PROCESSING RULES]\n1. Filter Noise: Ignore accidental repetitions, advertisements, URLs, subscription requests, and decorative formatting. Keep meaningful symbols (e.g., ⚠️) if crucial.\n2. Empty Input Protocol: If no factual news proposition remains after filtering, output EXACTLY the following string and nothing else: [NO_CONTENT_FOUND]\n3. Multiple Topics: Prioritize the primary event. Mention secondary events only without sacrificing the clarity and space of the primary event.\n4. Formats & Chronology: Convert lists/tables into natural prose. Maintain the original chronological order whenever possible.\n\n[TONE & FACTUALITY]\n1. Language & Tone: Strictly Persian (فارسی). Informative rather than sensational. Maintain a neutral, journalistic tone. Avoid clickbait or exaggerated language.\n2. Factuality: Do not omit essential facts required to understand the core event. Keep ambiguities intact. Do not add external facts. \n3. Pronoun Resolution: If a pronoun (e.g., \"وی\", \"او\") refers to a clear antecedent in the text, you should use the actual name or entity for clarity. Never replace missing subjects with inferred entities.\n4. Preservation: Preserve the identity of proper names, numbers, percentages, currencies, measurements, and dates. Do not substitute, entirely translate, or arbitrarily normalize them unless necessary for natural Persian readability.\n5. Quotations: Convert to reported speech only when no factual meaning changes.\n\n[STRICT OUTPUT FORMAT]\nOutput UNICODE TEXT ONLY (Text + Emojis). Avoid Markdown formatting (no **, *, -, #).\nUse exactly ONE blank line between the headline and the summary. Do not output extra blank lines.\n\n📊 [Headline]\n\n[Line 1: The core event (Who/What)] [Emoji]\n[Line 2: The context or key details (Why it matters)] [Emoji]\n[Line 3: The conclusion or current status] [Emoji]\n\n[FORMAT CONSTRAINTS]\n- Headline: Maximum 12 Persian words. Must be attention-grabbing but factual. Must start with the 📊 emoji.\n- Summary Lines: Exactly three lines. Each line must be one concise sentence (Maximum 180 characters per line). If the source is extremely short, lines may be brief to avoid forced repetition.\n- Emojis: Place exactly ONE highly relevant emoji at the absolute end of Line 1, Line 2, and Line 3. \n\n[INTERNAL QUALITY CONTROL]\nSilently execute these checks before outputting:\n- Check preservation: Are identities, numbers, and dates accurate?\n- Check line count: Are there exactly three summary lines?\n- Check formatting: Are there zero Markdown symbols?\nONLY output the final verified Persian text."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -704,
+        544
+      ],
+      "id": "c323808b-312c-4d99-8f19-255b4c9de077",
+      "name": "AI Agent1",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "deepseek-v4-flash",
+          "mode": "list",
+          "cachedResultName": "deepseek-v4-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -672,
+        736
+      ],
+      "id": "c966bc6c-f511-46d3-adcd-384392ef8556",
+      "name": "fallback model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "Configure your openAiApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "gemini-2.5-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -784,
+        736
+      ],
+      "id": "f930ad96-32fc-4f7e-8f62-c7b6328068f7",
+      "name": "main model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "Configure your openAiApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// 🌟 استخراج کاملاً ایمن و هوشمند: جلوگیری از کرش کردن n8n\nlet node1 = null;\nlet node6 = null;\n\ntry { node1 = $('Code in JavaScript').first().json; } catch(e) {}\ntry { node6 = $('Code in JavaScript6').first().json; } catch(e) {}\n\n// بررسی دقیق: کُدام نود واقعاً اطلاعات فایل (my_data) را دارد؟\nlet sourceNode = {};\nif (node6 && node6.my_data) {\n    // اگر در مسیر دکمه‌ها هستیم و نود ۶ دیتا دارد، حتماً این را انتخاب کن\n    sourceNode = node6; \n} else if (node1 && node1.my_data) {\n    // اگر در مسیر پیام جدید هستیم\n    sourceNode = node1; \n} else {\n    // حالت پیش‌فرض (فال‌بک نهایی)\n    sourceNode = node1 || node6 || {};\n}\n\nfor (let i = 0; i < items.length; i++) {\n  \n  // ۱. دریافت متغیرهای اصلی مستقیماً از نود انتخاب شده\n  let chatId = sourceNode.message?.from?.id || sourceNode.message?.chat?.id || sourceNode.callback_query?.message?.chat?.id; \n  let replyToId = sourceNode.message?.message_id || sourceNode.callback_query?.message?.reply_to_message?.message_id;\n  \n  // استخراج اطلاعات فایل و متن \n  // 🌟 استخراج متن خام\n  let rawTextContent = items[i].json.cleaned || sourceNode.my_data?.text_content || sourceNode.original_text || \"\";\n  \n  // 🌟 اضافه کردن محتوای استاتیک بالا و پایین\n  let headerText = \"🚨خبر\\n\\n\";\n  let footerText = \"\\n\\n━━━━━━━━━━━━━━\\n📢 کانال اخبار و تحلیل کریپتو\\n🆔 @YourChannel\";\n  \n  // ترکیب نهایی متن (اگر متن خام خالی بود، فقط استاتیک‌ها ارسال میشن)\n  let textContent = `${headerText}${rawTextContent}${footerText}`;\n  let mediaType = sourceNode.my_data?.media_type || \"text\";\n  let fileId = sourceNode.my_data?.file_id || null;\n  let mediaGroupId = sourceNode.my_data?.media_group_id || null; // 🌟 متغیر تشخیص آلبوم\n\n  let endpoint = \"sendMessage\";\n  let payload = {\n    chat_id: chatId,\n    reply_to_message_id: replyToId, // ریپلای روی پیام اصلی\n    reply_markup: {\n      inline_keyboard: [\n        [\n          { text: \"✅ تایید و ارسال به کانال\", callback_data: \"approve\", style: \"success\" }\n        ],\n        [\n          { text: \"🔄 رد و بازتولید\", callback_data: \"reject\", style: \"danger\" }\n        ]\n      ]\n    }\n  };\n\n  // ۲. تصمیم‌گیری هوشمندانه بر اساس نوع محتوا\n  if (fileId && mediaType !== \"text\") {\n    \n    if (mediaGroupId) {\n      // 🚨 حالت آلبوم: فقط یک پیام متنی می‌سازیم که روی عکس اول آلبوم ریپلای می‌شود\n      endpoint = \"sendMessage\";\n      payload.text = textContent;\n    } else {\n      // 🖼 حالت فایل تکی: دکمه زیر عکس/ویدیو قرار می‌گیرد\n      payload.caption = textContent; \n      \n      switch (mediaType) {\n        case \"photo\": endpoint = \"sendPhoto\"; payload.photo = fileId; break;\n        case \"video\": endpoint = \"sendVideo\"; payload.video = fileId; break;\n        case \"voice\": endpoint = \"sendVoice\"; payload.voice = fileId; break;\n        case \"audio\": endpoint = \"sendAudio\"; payload.audio = fileId; break;\n        case \"document\": endpoint = \"sendDocument\"; payload.document = fileId; break;\n        case \"animation\": endpoint = \"sendAnimation\"; payload.animation = fileId; break;\n      }\n    }\n    \n  } else {\n    // 📝 حالت متن خالی\n    endpoint = \"sendMessage\";\n    payload.text = textContent;\n  }\n\n  // ۳. اضافه کردن خروجی نهایی برای نود HTTP Request\n  items[i].json.api_endpoint = endpoint;\n  items[i].json.api_payload = payload;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        832
+      ],
+      "id": "55c9d243-c5ff-4e39-a238-5dbb52ec5a40",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        240,
+        832
+      ],
+      "id": "8f034236-e77f-4985-aa46-d730c0f8ce4f",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dc8246b7-7d3b-4efd-a167-98a26cabf56c",
+              "leftValue": "={{ $('Code in JavaScript').first().json?.my_data?.media_group_id || $('Code in JavaScript').first().json?.message?.media_group_id || $('Code in JavaScript').first().json?.callback_query?.message?.reply_to_message?.media_group_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -288,
+        544
+      ],
+      "id": "906f3538-61e9-4f7c-af6a-1a46ef3c9b61",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// 🌟 استخراج کاملاً ایمن و هوشمند: جلوگیری از کرش کردن n8n\nlet node1 = null;\nlet node6 = null;\n\ntry { node1 = $('Code in JavaScript').first().json; } catch(e) {}\ntry { node6 = $('Code in JavaScript6').first().json; } catch(e) {}\n\n// بررسی دقیق: کُدام نود واقعاً اطلاعات فایل (my_data) را دارد؟\nlet sourceNode = {};\nif (node6 && node6.my_data) {\n    // اگر در مسیر دکمه‌ها هستیم و نود ۶ دیتا دارد، حتماً این را انتخاب کن\n    sourceNode = node6; \n} else if (node1 && node1.my_data) {\n    // اگر در مسیر پیام جدید هستیم\n    sourceNode = node1; \n} else {\n    // حالت پیش‌فرض (فال‌بک نهایی)\n    sourceNode = node1 || node6 || {};\n}\n\nfor (let i = 0; i < items.length; i++) {\n  \n  // ۱. دریافت متغیرهای اصلی مستقیماً از نود انتخاب شده\n  let chatId = sourceNode.message?.from?.id || sourceNode.message?.chat?.id || sourceNode.callback_query?.message?.chat?.id; \n  let replyToId = sourceNode.message?.message_id || sourceNode.callback_query?.message?.reply_to_message?.message_id;\n  \n  // استخراج اطلاعات فایل و متن \n  // 🌟 استخراج متن خام\n  let rawTextContent = items[i].json.cleaned || sourceNode.my_data?.text_content || sourceNode.original_text || \"\";\n  \n  // 🌟 اضافه کردن محتوای استاتیک بالا و پایین\n  let headerText = \"🚨خبر\\n\\n\";\n  let footerText = \"\\n\\n━━━━━━━━━━━━━━\\n📢 کانال اخبار و تحلیل کریپتو\\n🆔 @YourChannel\";\n  \n  // ترکیب نهایی متن (اگر متن خام خالی بود، فقط استاتیک‌ها ارسال میشن)\n  let textContent = `${headerText}${rawTextContent}${footerText}`;\n  let mediaType = sourceNode.my_data?.media_type || \"text\";\n  let fileId = sourceNode.my_data?.file_id || null;\n  let mediaGroupId = sourceNode.my_data?.media_group_id \n  || node1?.message?.media_group_id \n  || node1?.callback_query?.message?.reply_to_message?.media_group_id \n  || null; // 🌟 متغیر تشخیص آلبوم\n\n  let endpoint = \"sendMessage\";\n  let payload = {\n    chat_id: chatId,\n    reply_to_message_id: replyToId, // ریپلای روی پیام اصلی\n    reply_markup: {\n      inline_keyboard: [\n        [\n          { text: \"✅ تایید و ارسال به کانال\", callback_data: mediaGroupId ? String(mediaGroupId) : \"approve\", style: \"success\" }\n        ],\n        [\n          { text: \"🔄 رد و بازتولید\", callback_data: \"reject\", style: \"danger\" }\n        ]\n      ]\n    }\n  };\n\n  // ۲. تصمیم‌گیری هوشمندانه بر اساس نوع محتوا\n  if (fileId && mediaType !== \"text\") {\n    \n    if (mediaGroupId) {\n      // 🚨 حالت آلبوم: فقط یک پیام متنی می‌سازیم که روی عکس اول آلبوم ریپلای می‌شود\n      endpoint = \"sendMessage\";\n      payload.text = textContent;\n    } else {\n      // 🖼 حالت فایل تکی: دکمه زیر عکس/ویدیو قرار می‌گیرد\n      payload.caption = textContent; \n      \n      switch (mediaType) {\n        case \"photo\": endpoint = \"sendPhoto\"; payload.photo = fileId; break;\n        case \"video\": endpoint = \"sendVideo\"; payload.video = fileId; break;\n        case \"voice\": endpoint = \"sendVoice\"; payload.voice = fileId; break;\n        case \"audio\": endpoint = \"sendAudio\"; payload.audio = fileId; break;\n        case \"document\": endpoint = \"sendDocument\"; payload.document = fileId; break;\n        case \"animation\": endpoint = \"sendAnimation\"; payload.animation = fileId; break;\n      }\n    }\n    \n  } else {\n    // 📝 حالت متن خالی\n    endpoint = \"sendMessage\";\n    payload.text = textContent;\n  }\n\n  // ۳. اضافه کردن خروجی نهایی برای نود HTTP Request\n  items[i].json.api_endpoint = endpoint;\n  items[i].json.api_payload = payload;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        528
+      ],
+      "id": "6f86f3a7-e47b-4359-bcb5-d1f80ecb9f8b",
+      "name": "Code in JavaScript10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        528
+      ],
+      "id": "801fd5e6-a96d-4b9b-b116-0f57400e2486",
+      "name": "HTTP Request6"
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// ۱. گرفتن متن ورودی از نود HTTP Request1 (به صورت کاملاً ایمن)\nlet rawText = \"\";\ntry {\n  let reqJson = $('HTTP Request1').first().json;\n  let fallbackJson = $('Code in JavaScript5').first().json;\n\n  // استفاده از مسیر جدید با Optional Chaining\n  // پشتیبانی از caption (مدیا) و text (متن خالص)\n  // پشتیبانی از ساختار آرایه‌ای [0] و ساختار آبجکتی مستقیم\n  rawText = reqJson?.result?.[0]?.caption || \n            reqJson?.result?.[0]?.text || \n            reqJson?.result?.caption ||       // برای زمانی که result آبجکت است (مثل همین خروجی)\n            reqJson?.result?.text ||          // هدف اصلی در این خروجی شما\n            reqJson?.result?.result?.[0]?.caption || \n            reqJson?.result?.result?.[0]?.text || \n            fallbackJson?.api_payload?.caption || \n            fallbackJson?.api_payload?.text || \n            \"\";\n} catch (error) {\n  rawText = \"\";\n}\n\nfor (let i = 0; i < items.length; i++) {\n  let extractedHeadline = \"\";\n\n  // ۲. استفاده از Regex برای پیدا کردن ایموجی 📊 و استخراج متن جلوی آن\n  let match = rawText.match(/📊\\s*([^\\n]+)/);\n\n  if (match && match[1]) {\n    // ۳. حذف فاصله‌های خالی احتمالی از ابتدا و انتهای متن استخراج شده\n    extractedHeadline = match[1].trim(); \n  }\n\n  // ۴. قرار دادن نتیجه در خروجی با نام extracted_headline\n  items[i].json.extracted_headline = extractedHeadline;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1440,
+        1312
+      ],
+      "id": "00ed2ae3-9450-4f9d-895c-c129c2bb5595",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "aQjFfQbpYEZyTCHN",
+          "mode": "list",
+          "cachedResultName": "News",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/aQjFfQbpYEZyTCHN"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "link": "={{ $('HTTP Request1').first().json.result?.[0]?.message_id ?? $('HTTP Request1').first().json.result?.message_id }}",
+            "Title": "={{ $json.extracted_headline }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1232,
+        1312
+      ],
+      "id": "5a37fff3-8823-4ca2-a6dd-9596dce34f06",
+      "name": "Insert row1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0f8b27f8-c518-4b9d-bd88-eabfcae93ca8",
+              "leftValue": "={{ $('Code in JavaScript').first().json.callback_query.message.reply_to_message.forward_origin.chat.username }}",
+              "rightValue": "cointelegraph",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1680,
+        1328
+      ],
+      "id": "1ad84599-0c15-4625-8d11-ae29e869d19b",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Code in JavaScript3').first().json.callback_query.from.id }}",
+        "text": "✅ خبر با موفقیت در دیتابیس ذخیره شد!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1024,
+        1312
+      ],
+      "id": "d0eac455-9a6c-4488-8e19-1dd28685b1c8",
+      "name": "Send a text message2",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Configure your telegramApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "aQjFfQbpYEZyTCHN",
+          "mode": "list",
+          "cachedResultName": "News",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/aQjFfQbpYEZyTCHN"
+        },
+        "returnAll": true,
+        "orderBy": true,
+        "orderByDirection": "ASC"
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -3168,
+        1664
+      ],
+      "id": "d6532bc2-601c-43cf-b194-43fb621f1865",
+      "name": "Get row(s)"
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// مرتب‌سازی از قدیمی‌ترین به جدیدترین بر اساس id\n// (ستونی که n8n خودش موقع insert به‌صورت خودکار و افزایشی می‌سازه)\nitems.sort((a, b) => a.json.id - b.json.id);\n\nconst numberEmojis = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];\n\nfunction toEmojiNumber(n) {\n  if (n >= 1 && n <= 10) return numberEmojis[n];\n  // راه حل بدون بهم ریختن راست‌چین: \n  // ارقام را برعکس (reverse) می‌کنیم تا وقتی تلگرامِ فارسی آن‌ها را جابجا می‌کند، به ترتیب درست نمایش داده شوند\n  return String(n).split('').reverse().map(d => numberEmojis[Number(d)]).join('');\n}\n\nfunction escapeHtml(str) {\n  return String(str || '')\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;');\n}\n\n// آیدی عددی کانال شما بدون پیشوند \"-100\" (برای ساخت لینک t.me/c/)\nconst channelIdForLink = \"YOUR_CHANNEL_NUMERIC_ID\";\n\nlet lines = items.map((item, index) => {\n  const title = escapeHtml(item.json.Title);\n  const messageId = item.json.link;\n  const url = `https://t.me/c/${channelIdForLink}/${messageId}`;\n  const emojiNum = toEmojiNumber(index + 1);\n  return `${emojiNum} <a href=\"${url}\">${title}</a>`;\n});\n\nconst finalText = lines.join('\\n\\n');\n\nreturn [{ json: { text: finalText } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2960,
+        1664
+      ],
+      "id": "e31a2496-66fb-44f7-801a-4dc23eda963b",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "resource": "table",
+        "operation": "clear",
+        "dataTableId": {
+          "__rl": true,
+          "value": "aQjFfQbpYEZyTCHN",
+          "mode": "list",
+          "cachedResultName": "News",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/aQjFfQbpYEZyTCHN"
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2336,
+        1664
+      ],
+      "id": "0cb1b594-0eb9-43ac-b6a6-40365c946342",
+      "name": "Clear a data table"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -3360,
+        1664
+      ],
+      "id": "792709e1-7c23-4056-bc4e-8202b9e37b6a",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $if($('Code in JavaScript').isExecuted, $('Code in JavaScript').first().json.my_data?.text_content, '') || $if($('Code in JavaScript6').isExecuted, $('Code in JavaScript6').first().json.original_text, '') || 'کپشنی نداریم پس کپشنی تولید نکن' }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "[OBJECTIVE]\nYour task is to extract and rewrite, in Persian, the \"Market Overview\" portion of an English-language source text.\nMarket Overview means any part of the text that explicitly reports a market performance metric or indicator — including but not limited to price changes, gainers/losers rankings, dominance, trading volume, market cap, open interest, funding rate, Fear & Greed Index, liquidations, ETF flows, or any other explicitly reported market performance metric or indicator.\nThe final output must contain only this type of information; everything else must be removed.\n\n[PRIORITY ORDER — resolve conflicts using this order, highest first]\n1. Factual accuracy\n2. Preserve all market data present in the source\n3. Preserve original meaning\n4. Information density\n5. Readability\n6. Formatting\n\n[INFORMATION DENSITY]\nMaximize information density while preserving factual accuracy and readability. Do not pad the output with filler phrases, redundant restatements, or generic transitions that add no factual content.\n\n[SOURCE OF TRUTH — GOLDEN RULE]\nThe only permitted source of information is the exact text given in the user's message.\n- Never use general knowledge, your training data, or any external information about crypto prices, projects, or market events.\n- Never add, guess, or complete any number, percentage, ticker, or event that is not present in the source text.\n- If a market metric is incomplete in the source (e.g. a ticker with no percentage, or a percentage with no ticker), preserve only that incomplete fragment exactly as given — never complete or guess the missing part.\n- If the source text contains no market metric as defined above, output exactly this string and nothing else: [NO_MARKET_DATA]\n\n[REMOVAL RULE — single purpose-based rule, not a list of categories]\nRemove any part of the text that does not explicitly report a market performance metric or indicator as defined above — regardless of whether that part is news, a funding/VC paragraph, promotional text, a call to action, a subscription link, a tool attribution line, or decorative emoji with no informational function.\n\nException: if the source text explicitly states that a specific news event is the reason for a specific reported market movement (e.g. \"Bitcoin fell after CPI data was released\"), keep that explanatory sentence, since it is itself part of describing the market movement. Do not infer or assume a causal link that the source does not explicitly state.\n\n[NAMING AND TERMINOLOGY RULES]\n- Tickers (BTC, ETH, MEGA, ZK, etc.) must be preserved exactly as written in Latin/uppercase form — never translated or transliterated.\n- Common financial abbreviations (ETF, TVL, APR, ROI, ATH, ATL, FDV, CPI, etc.) must be preserved exactly as written — never translated or expanded.\n- Never expand a name beyond what appears in the source. If the source only says \"Vitalik\", the output must reflect only that same partial form (Latin or its short Persian transliteration) — never expand it to a full name (\"ویتالیک بوترین\") unless the full name literally appears in the source.\n- All numbers and percentages must be preserved exactly as written in the source — no rounding, no sign changes.\n\n[HEADLINE RULE]\nIf the source text has a title or an introductory sentence stating the topic, base the Persian headline on it.\nIf the source has no title or introductory sentence (e.g. it is only a raw list of tickers and percentages), generate a short, strictly factual headline based only on the data present in the source — never introduce any new detail or event that is not in the source.\n\n[CONTEXT SENTENCE LIMIT]\nInclude at most one or two concise sentences of explanatory context, and only if such context is explicitly present in the source per the Removal Rule exception above. If the source has more explanatory sentences than this, select the one or two most directly tied to the reported metrics; do not include all of them.\n\n[OUTPUT ORDER]\nAlways present the output in the following order: headline → explanatory context (if any) → market data. Do not reorder these sections even if the source presents them in a different order.\n\n[OUTPUT STRUCTURE]\n📊 [Short Persian headline, max 12 words]\n\n[One or two concise explanatory sentences — omit this section entirely if no such context exists in the source; do not invent a replacement sentence]\n\n📉 List of market metrics, one per line:\nTICKER percentage% (or metric name and value, exactly as it appears in the source)\n\n[Do not add any summary, conclusion, or call to action after the list, unless the source itself contains such a conclusion directly tied to the same data]\n\n[FORMATTING RULES]\n- No Markdown (no **, *, #, no leading - on a line)\n- Exactly one blank line between the headline and the rest of the text; no other blank lines anywhere\n- List market metrics one per line, without additional numbering, unless instructed otherwise\n- All narrative text must be Persian; only tickers and required financial abbreviations remain in Latin\n\n[SILENT PRE-OUTPUT CHECKLIST — verify internally, never show this to the user; revise the output if any answer is \"no\"]\n1. Does every number/percentage/ticker in the output exactly match the source, with no rounding or alteration?\n2. Has no data, event, or name been added that is not present in the source?\n3. Has every part that does not explicitly report a market metric been removed, regardless of its type?\n4. Have all market metrics present in the source been preserved in the output (not just correctly removed elsewhere)?\n5. Is all narrative text Persian, while required tickers and financial abbreviations remain in Latin?\n6. Has no name been expanded beyond what appears in the source?\n7. Is Markdown avoided, and is the order (headline → context → data) followed?\n\n[CONFLICT PRIORITY]\nIf following the output structure conflicts with the golden rule of using only the source text, always prioritize the golden rule and omit the conflicting section rather than inventing content to fill it."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -672,
+        1024
+      ],
+      "id": "58aaa52a-6014-44b8-9554-45177eba59bb",
+      "name": "AI Agent2",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "deepseek-v4-flash",
+          "mode": "list",
+          "cachedResultName": "deepseek-v4-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        1216
+      ],
+      "id": "7376c604-459a-402b-aaed-a1d87cec99f0",
+      "name": "fallback model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "Configure your openAiApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "gemini-2.5-flash"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -752,
+        1216
+      ],
+      "id": "3e62064e-98bc-42c9-9a83-846790c1657f",
+      "name": "main model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "Configure your openAiApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// 🌟 استخراج کاملاً ایمن و هوشمند: جلوگیری از کرش کردن n8n\nlet node1 = null;\nlet node6 = null;\n\ntry { node1 = $('Code in JavaScript').first().json; } catch(e) {}\ntry { node6 = $('Code in JavaScript6').first().json; } catch(e) {}\n\n// بررسی دقیق: کُدام نود واقعاً اطلاعات فایل (my_data) را دارد؟\nlet sourceNode = {};\nif (node6 && node6.my_data) {\n    // اگر در مسیر دکمه‌ها هستیم و نود ۶ دیتا دارد، حتماً این را انتخاب کن\n    sourceNode = node6; \n} else if (node1 && node1.my_data) {\n    // اگر در مسیر پیام جدید هستیم\n    sourceNode = node1; \n} else {\n    // حالت پیش‌فرض (فال‌بک نهایی)\n    sourceNode = node1 || node6 || {};\n}\n\nfor (let i = 0; i < items.length; i++) {\n  \n  // ۱. دریافت متغیرهای اصلی مستقیماً از نود انتخاب شده\n  let chatId = sourceNode.message?.from?.id || sourceNode.message?.chat?.id || sourceNode.callback_query?.message?.chat?.id; \n  let replyToId = sourceNode.message?.message_id || sourceNode.callback_query?.message?.reply_to_message?.message_id;\n  \n  // استخراج اطلاعات فایل و متن \n  // 🌟 استخراج متن خام\n  let rawTextContent = items[i].json.cleaned || sourceNode.my_data?.text_content || sourceNode.original_text || \"\";\n  \n  // 🌟 اضافه کردن محتوای استاتیک بالا و پایین\n  let headerText = \"🔴 نمای کلی بازار\\n\\n\";\n  let footerText = \"\\n\\n━━━━━━━━━━━━━━\\n📢 کانال اخبار و تحلیل کریپتو\\n🆔 @YourChannel\";\n  \n  // ترکیب نهایی متن (اگر متن خام خالی بود، فقط استاتیک‌ها ارسال میشن)\n  let textContent = `${headerText}${rawTextContent}${footerText}`;\n  let mediaType = sourceNode.my_data?.media_type || \"text\";\n  let fileId = sourceNode.my_data?.file_id || null;\n  let mediaGroupId = sourceNode.my_data?.media_group_id || null; // 🌟 متغیر تشخیص آلبوم\n\n  let endpoint = \"sendMessage\";\n  let payload = {\n    chat_id: chatId,\n    reply_to_message_id: replyToId, // ریپلای روی پیام اصلی\n    reply_markup: {\n      inline_keyboard: [\n        [\n          { text: \"✅ تایید و ارسال به کانال\", callback_data: \"approve\", style: \"success\" }\n        ],\n        [\n          { text: \"🔄 رد و بازتولید\", callback_data: \"reject\", style: \"danger\" }\n        ]\n      ]\n    }\n  };\n\n  // ۲. تصمیم‌گیری هوشمندانه بر اساس نوع محتوا\n  if (fileId && mediaType !== \"text\") {\n    \n    if (mediaGroupId) {\n      // 🚨 حالت آلبوم: فقط یک پیام متنی می‌سازیم که روی عکس اول آلبوم ریپلای می‌شود\n      endpoint = \"sendMessage\";\n      payload.text = textContent;\n    } else {\n      // 🖼 حالت فایل تکی: دکمه زیر عکس/ویدیو قرار می‌گیرد\n      payload.caption = textContent; \n      \n      switch (mediaType) {\n        case \"photo\": endpoint = \"sendPhoto\"; payload.photo = fileId; break;\n        case \"video\": endpoint = \"sendVideo\"; payload.video = fileId; break;\n        case \"voice\": endpoint = \"sendVoice\"; payload.voice = fileId; break;\n        case \"audio\": endpoint = \"sendAudio\"; payload.audio = fileId; break;\n        case \"document\": endpoint = \"sendDocument\"; payload.document = fileId; break;\n        case \"animation\": endpoint = \"sendAnimation\"; payload.animation = fileId; break;\n      }\n    }\n    \n  } else {\n    // 📝 حالت متن خالی\n    endpoint = \"sendMessage\";\n    payload.text = textContent;\n  }\n\n  // ۳. اضافه کردن خروجی نهایی برای نود HTTP Request\n  items[i].json.api_endpoint = endpoint;\n  items[i].json.api_payload = payload;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        1312
+      ],
+      "id": "de37ea56-256c-4b53-bbe3-3aa6f758bb6f",
+      "name": "Code in JavaScript8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        272,
+        1312
+      ],
+      "id": "226b0912-88aa-45f1-8819-41f9b92b552e",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dc8246b7-7d3b-4efd-a167-98a26cabf56c",
+              "leftValue": "={{ $('Code in JavaScript').first().json?.my_data?.media_group_id || $('Code in JavaScript').first().json?.message?.media_group_id || $('Code in JavaScript').first().json?.callback_query?.message?.reply_to_message?.media_group_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        1024
+      ],
+      "id": "fbe1d541-373a-4b60-88f0-b24139b89cbc",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "jsCode": "let items = $input.all();\n\n// 🌟 استخراج کاملاً ایمن و هوشمند: جلوگیری از کرش کردن n8n\nlet node1 = null;\nlet node6 = null;\n\ntry { node1 = $('Code in JavaScript').first().json; } catch(e) {}\ntry { node6 = $('Code in JavaScript6').first().json; } catch(e) {}\n\n// بررسی دقیق: کُدام نود واقعاً اطلاعات فایل (my_data) را دارد؟\nlet sourceNode = {};\nif (node6 && node6.my_data) {\n    // اگر در مسیر دکمه‌ها هستیم و نود ۶ دیتا دارد، حتماً این را انتخاب کن\n    sourceNode = node6; \n} else if (node1 && node1.my_data) {\n    // اگر در مسیر پیام جدید هستیم\n    sourceNode = node1; \n} else {\n    // حالت پیش‌فرض (فال‌بک نهایی)\n    sourceNode = node1 || node6 || {};\n}\n\nfor (let i = 0; i < items.length; i++) {\n  \n  // ۱. دریافت متغیرهای اصلی مستقیماً از نود انتخاب شده\n  let chatId = sourceNode.message?.from?.id || sourceNode.message?.chat?.id || sourceNode.callback_query?.message?.chat?.id; \n  let replyToId = sourceNode.message?.message_id || sourceNode.callback_query?.message?.reply_to_message?.message_id;\n  \n  // استخراج اطلاعات فایل و متن \n  // 🌟 استخراج متن خام\n  let rawTextContent = items[i].json.cleaned || sourceNode.my_data?.text_content || sourceNode.original_text || \"\";\n  \n  // 🌟 اضافه کردن محتوای استاتیک بالا و پایین\n  let headerText = \"🔴 نمای کلی بازار\\n\\n\";\n  let footerText = \"\\n\\n━━━━━━━━━━━━━━\\n📢 کانال اخبار و تحلیل کریپتو\\n🆔 @YourChannel\";\n  \n  // ترکیب نهایی متن (اگر متن خام خالی بود، فقط استاتیک‌ها ارسال میشن)\n  let textContent = `${headerText}${rawTextContent}${footerText}`;\n  let mediaType = sourceNode.my_data?.media_type || \"text\";\n  let fileId = sourceNode.my_data?.file_id || null;\n  let mediaGroupId = sourceNode.my_data?.media_group_id \n  || node1?.message?.media_group_id \n  || node1?.callback_query?.message?.reply_to_message?.media_group_id \n  || null; // 🌟 متغیر تشخیص آلبوم\n\n  let endpoint = \"sendMessage\";\n  let payload = {\n    chat_id: chatId,\n    reply_to_message_id: replyToId, // ریپلای روی پیام اصلی\n    reply_markup: {\n      inline_keyboard: [\n        [\n          { text: \"✅ تایید و ارسال به کانال\", callback_data: mediaGroupId ? String(mediaGroupId) : \"approve\", style: \"success\" }\n        ],\n        [\n          { text: \"🔄 رد و بازتولید\", callback_data: \"reject\", style: \"danger\" }\n        ]\n      ]\n    }\n  };\n\n  // ۲. تصمیم‌گیری هوشمندانه بر اساس نوع محتوا\n  if (fileId && mediaType !== \"text\") {\n    \n    if (mediaGroupId) {\n      // 🚨 حالت آلبوم: فقط یک پیام متنی می‌سازیم که روی عکس اول آلبوم ریپلای می‌شود\n      endpoint = \"sendMessage\";\n      payload.text = textContent;\n    } else {\n      // 🖼 حالت فایل تکی: دکمه زیر عکس/ویدیو قرار می‌گیرد\n      payload.caption = textContent; \n      \n      switch (mediaType) {\n        case \"photo\": endpoint = \"sendPhoto\"; payload.photo = fileId; break;\n        case \"video\": endpoint = \"sendVideo\"; payload.video = fileId; break;\n        case \"voice\": endpoint = \"sendVoice\"; payload.voice = fileId; break;\n        case \"audio\": endpoint = \"sendAudio\"; payload.audio = fileId; break;\n        case \"document\": endpoint = \"sendDocument\"; payload.document = fileId; break;\n        case \"animation\": endpoint = \"sendAnimation\"; payload.animation = fileId; break;\n      }\n    }\n    \n  } else {\n    // 📝 حالت متن خالی\n    endpoint = \"sendMessage\";\n    payload.text = textContent;\n  }\n\n  // ۳. اضافه کردن خروجی نهایی برای نود HTTP Request\n  items[i].json.api_endpoint = endpoint;\n  items[i].json.api_payload = payload;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        1008
+      ],
+      "id": "f92c5c6e-a73d-4b39-936a-470e1d21477c",
+      "name": "Code in JavaScript11"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/{{ $json.api_endpoint }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.api_payload }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        256,
+        1008
+      ],
+      "id": "5674eca8-7318-463d-8526-afc1b3f7ec1c",
+      "name": "HTTP Request8"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "9sL59gt2QhRyXpLZ",
+          "mode": "list",
+          "cachedResultName": "telegram_album_parts",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/9sL59gt2QhRyXpLZ"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "media_group_id",
+              "condition": "isEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1040,
+        1136
+      ],
+      "id": "703f6c31-4696-4d63-8bca-4afc1df8bf4b",
+      "name": "Delete row(s)1",
+      "retryOnFail": true,
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "sendVideo",
+        "chatId": "={{ $env.TELEGRAM_ADMIN_CHAT_ID || 'YOUR_ADMIN_CHAT_ID' }}",
+        "file": "BAACAgQAAxkBAAIE_mpxJealI-wrMDN1uxLKRvkT9ni4AAK5HAACtE2JU_2D_yz0BCFuPQQ",
+        "additionalFields": {
+          "caption": "=⏰ اخبار ۲۴ ساعت گذشته\n\n{{ $json.textChunk }}",
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -2560,
+        1664
+      ],
+      "id": "3bd6197c-acb5-403e-93ca-ea74fc7628e9",
+      "name": "Send a video1",
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Configure your telegramApi"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "value": "aQjFfQbpYEZyTCHN",
+          "mode": "list",
+          "cachedResultName": "News",
+          "cachedResultUrl": "/projects/gDTu1hRAnxqUqDeP/datatables/aQjFfQbpYEZyTCHN"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Title",
+              "condition": "isEmpty"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -2128,
+        1664
+      ],
+      "id": "e64e9802-64db-4a33-bff9-08f39381c214",
+      "name": "Delete row(s)2",
+      "retryOnFail": true,
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// دریافت متن کامل ساخته شده از نود قبلی\nconst originalText = $input.first().json.text;\n\n// جدا کردن متن‌ها بر اساس دو تا اینتر (\\n\\n) که بین هر خبر گذاشته بودید\n// اینطوری به جای بریدن کلمات یا تگ‌های HTML، خبرها رو به صورت واحد جدا می‌کنیم\nconst newsItems = originalText.split('\\n\\n');\n\n// تعیین می‌کنیم که در هر پیام چند خبر (چند خط) فرستاده شود\n// تلگرام برای کپشن عکس/ویدیو نهایتاً 1024 کاراکتر جا دارد\n// معمولاً ارسال 10 تا 15 خبر در هر کپشن ایمن است\nconst itemsPerChunk = 10; \n\nconst chunks = [];\n\n// خبرها رو دسته‌دسته به هم می‌چسبونیم\nfor (let i = 0; i < newsItems.length; i += itemsPerChunk) {\n  // برداشتن 12 خبر و چسباندن مجدد آنها با \\n\\n\n  const chunkText = newsItems.slice(i, i + itemsPerChunk).join('\\n\\n');\n  chunks.push(chunkText);\n}\n\n// ارسال هر دسته به عنوان یک آیتم جداگانه برای نود تلگرام\nreturn chunks.map(chunk => {\n  return {\n    json: {\n      textChunk: chunk\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2784,
+        1664
+      ],
+      "id": "7415124b-f0d8-4609-bef2-10069459ca80",
+      "name": "Code in JavaScript14"
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $('AI Agent').first().json.output;\n\n// حذف تمام علائم Markdown\ntext = text\n  .replace(/[*_`~#>+-]/g, \"\")           // حذف *, _, `, ~, #, >, +, -\n  .replace(/\\[(.*?)\\]\\((.*?)\\)/g, \"$1\") // حذف لینک فرمت\n  .replace(/[<>]/g, \"\")                 // حذف <> که تلگرام حساس است\n  .replace(/[{}]/g, \"\")                 // حذف {}\n  .replace(/\\\\/g, \"\")                   // حذف بک اسلش\n  .replace(/[\\u202A-\\u202E]/g, \"\")      // حذف کاراکترهای RTL پنهان\n  .replace(/\\d+\\./g, \"$& \")             // ایمن سازی اعداد لیست\n\n// حذف کاراکترهای یونیکد خطرناک مثل —\ntext = text.replace(/[\\u2012-\\u2015]/g, \"-\");\n\n// حذف هرگونه فرمت بولد دو ستاره ای مثل **bold**\ntext = text.replace(/\\*\\*/g, \"\");\n\n// حذف دابل اسپیس‌ها\ntext = text.replace(/  +/g, \" \");\n\nreturn { json: { cleaned: text } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        16
+      ],
+      "id": "2df51433-55ff-4ee7-b623-95c36142f1f6",
+      "name": "cleaned"
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $('AI Agent').first().json.output;\n\n// حذف تمام علائم Markdown\ntext = text\n  .replace(/[*_`~#>+-]/g, \"\")           // حذف *, _, `, ~, #, >, +, -\n  .replace(/\\[(.*?)\\]\\((.*?)\\)/g, \"$1\") // حذف لینک فرمت\n  .replace(/[<>]/g, \"\")                 // حذف <> که تلگرام حساس است\n  .replace(/[{}]/g, \"\")                 // حذف {}\n  .replace(/\\\\/g, \"\")                   // حذف بک اسلش\n  .replace(/[\\u202A-\\u202E]/g, \"\")      // حذف کاراکترهای RTL پنهان\n  .replace(/\\d+\\./g, \"$& \")             // ایمن سازی اعداد لیست\n\n// حذف کاراکترهای یونیکد خطرناک مثل —\ntext = text.replace(/[\\u2012-\\u2015]/g, \"-\");\n\n// حذف هرگونه فرمت بولد دو ستاره ای مثل **bold**\ntext = text.replace(/\\*\\*/g, \"\");\n\n// حذف دابل اسپیس‌ها\ntext = text.replace(/  +/g, \" \");\n\nreturn { json: { cleaned: text } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        544
+      ],
+      "id": "60f38832-3c12-4a07-8c09-d4fa1045f803",
+      "name": "cleaned1"
+    },
+    {
+      "parameters": {
+        "jsCode": "let text = $('AI Agent').first().json.output;\n\n// حذف تمام علائم Markdown\ntext = text\n  .replace(/[*_`~#>+-]/g, \"\")           // حذف *, _, `, ~, #, >, +, -\n  .replace(/\\[(.*?)\\]\\((.*?)\\)/g, \"$1\") // حذف لینک فرمت\n  .replace(/[<>]/g, \"\")                 // حذف <> که تلگرام حساس است\n  .replace(/[{}]/g, \"\")                 // حذف {}\n  .replace(/\\\\/g, \"\")                   // حذف بک اسلش\n  .replace(/[\\u202A-\\u202E]/g, \"\")      // حذف کاراکترهای RTL پنهان\n  .replace(/\\d+\\./g, \"$& \")             // ایمن سازی اعداد لیست\n\n// حذف کاراکترهای یونیکد خطرناک مثل —\ntext = text.replace(/[\\u2012-\\u2015]/g, \"-\");\n\n// حذف هرگونه فرمت بولد دو ستاره ای مثل **bold**\ntext = text.replace(/\\*\\*/g, \"\");\n\n// حذف دابل اسپیس‌ها\ntext = text.replace(/  +/g, \" \");\n\nreturn { json: { cleaned: text } };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        1024
+      ],
+      "id": "0f2062c9-0e97-4d9a-a461-5665aa0de7e1",
+      "name": "cleaned2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Media without caption?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "cleaned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fallback model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "main model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "message or query": {
+      "main": [
+        [
+          {
+            "node": "Channels",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Channels": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Album Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Channels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has media_group_id?": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "message or query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Album Rows": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete row(s)": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Media without caption?": {
+      "main": [
+        [
+          {
+            "node": "Build No-Caption Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Has media_group_id?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build No-Caption Payload": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript9",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript9": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get Album Rows (No Caption)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Album Rows (No Caption)": {
+      "main": [
+        [
+          {
+            "node": "Build Album No-Caption Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Album No-Caption Payload": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "cleaned1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fallback model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "main model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript10",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript10": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Insert row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript14",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "cleaned2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fallback model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "main model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript11",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript11": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear a data table": {
+      "main": [
+        [
+          {
+            "node": "Delete row(s)2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript14": {
+      "main": [
+        [
+          {
+            "node": "Send a video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a video1": {
+      "main": [
+        [
+          {
+            "node": "Clear a data table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleaned": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleaned1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleaned2": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v0",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "u7BNt7UdxewOlOT3"
+  },
+  "versionId": "c0a3291c-98fa-4989-ac56-0e02570c201a",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "tags": []
+}

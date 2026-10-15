@@ -1,0 +1,7 @@
+.env
+*.session
+*.session-journal
+__pycache__/
+relay_queue.db
+relay_queue.db-wal
+relay_queue.db-shm
